@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>card</title>
+	<style>
+	*{
+		margin:0;
+		padding:0;
+	}
+	.item{
+		list-style-type:none;
+		
+		width:80px;
+		height:80px;
+		line-height:80px;
+		text-align:center;
+		font-size:28px;
+		position:absolute;
+		transition:linear 0.3s;
+		color:white;
+	}
+
+	.place0{left:5px;top:5px}
+	.place1{left:95px;top:5px}
+	.place2{left:185px;top:5px}
+	.place3{left:275px;top:5px}
+	.place4{left:5px;top:95px}
+	.place5{left:95px;top:95px}
+	.place6{left:185px;top:95px}
+	.place7{left:275px;top:95px}
+	.place8{left:5px;top:185px}
+	.place9{left:95px;top:185px}
+	.place10{left:185px;top:185px}
+	.place11{left:275px;top:185px}
+	.place12{left:5px;top:275px}
+	.place13{left:95px;top:275px}
+	.place14{left:185px;top:275px}
+	.place15{left:275px;top:275px}
+	
+	</style>
+</head>
+<body>
+	<div style="width:360px;height:360px;position:absolute;border:1px solid black;">
+		<canvas id="canvas" width="360" height="360" style="position:absolute"></canvas>
+		<ul style="width:360px;height:360px;position:absolute;"></ul>	
+	</div>
+	<script src="dom.js"></script>
+	<script>
+		var game={
+			site:new Array(16).fill(0).map((item,index)=>{return item="place"+index}),
+			empty:function(){
+				var arr=new Set(this.site);
+				var arr2=new Set(this.use);
+				return	Array.from(new Set([...arr].filter(item => !arr2.has(item))));
+			},
+			use:[],
+			obj:[],
+			run:1,
+			dom:new Map(),
+			init:function(){
+			    this.drawline();
+				this.create();
+				this.pressleft();
+				this.pressright();
+				this.pressup();
+				this.pressdown();	
+			},
+			drawline:function(){
+				var canvas=document.getElementById("canvas");
+				var ctx=canvas.getContext("2d");
+				var time=1;
+				var coordx=5,coordy=5;
+				
+				for(var i=0;i<16;i++){
+				console.log(coordx,coordy,coordx+70,coordy+70)
+					ctx.beginPath();
+					ctx.strokeStyle="black";
+					ctx.lineWidth=2;
+					ctx.rect(coordx,coordy,80,80);
+					ctx.stroke();
+					time%4!=0?(coordx+=90,time+=1):(coordx=5,coordy+=90,time=1);
+							
+				}
+
+			},
+			create:function(){
+				var li=document.createElement("li");								
+				li.innerHTML=(parseInt(Math.random()*2)+1)*2;
+				if(li.innerHTML==2){
+					li.style.backgroundColor="#bbffff"
+				}
+				else{				   
+					li.style.backgroundColor="#88ffff"
+				}
+				var num=parseInt(Math.random()*this.empty().length);
+				li.className=`${this.empty()[num]} item`;
+				document.getElementsByTagName("ul")[0].appendChild(li);
+				this.obj.push(li);									
+			},
+			pressleft:function(){
+				var vthis=this;
+				document.addEventListener("keydown",function(e){
+					var ev=e || event;
+					vthis.judge(37,{a:1,b:5,c:9,d:13},{a:2,b:6,c:10,d:14},{a:3,b:7,c:11,d:15},ev,vthis,0)
+					//e.preventDefault();
+				},false)
+			},
+			pressright:function(){
+				var vthis=this;
+				document.addEventListener("keydown",function(e){
+					var ev= e || event;
+					vthis.judge(39,{a:2,b:6,c:10,d:14},{a:1,b:5,c:9,d:13},{a:0,b:4,c:8,d:12},ev,vthis,1)
+					//e.preventDefault();
+				},false)
+			},
+			pressup:function(){
+				var vthis=this;
+				document.addEventListener("keydown",function(e){
+					var ev= e || event;
+					vthis.judge(38,{a:4,b:5,c:6,d:7},{a:8,b:9,c:10,d:11},{a:12,b:13,c:14,d:15},ev,vthis,0)
+					//e.preventDefault();
+				},false)
+			},
+			pressdown:function(){
+				var vthis=this;
+				document.addEventListener("keydown",function(e){
+					var ev= e || event;
+					vthis.judge(40,{a:8,b:9,c:10,d:11},{a:4,b:5,c:6,d:7},{a:0,b:1,c:2,d:3},ev,vthis,1,1)
+					//e.preventDefault();
+				},false)
+			},
+			setobj:function(){
+				var len=this.obj.length;
+				this.dom.clear();
+				console.log(this.obj,"jiedian")
+				for(var i=0;i<len;i++){
+					this.dom.set(Number(this.obj[i].className.match(/\d+/)),this.obj[i]);
+				}
+					
+			},
+			judge:function (kcode,obj1,obj2,obj3,ev,vthis,asc,over){
+				if(this.run){
+					console.time(1);
+					var ov= over || 1;
+					if(ev.keyCode==kcode){
+						this.setobj()
+						//console.log(this.dom,"map  jiedian")
+						var len=this.dom.size;	
+						var classnum=[];
+						var element=[]
+						for(var k of vthis.dom.keys()){
+							classnum.push(k);								
+						}
+						if(!asc){
+							classnum=classnum.sort(function(a,b){return a-b})
+						}else{
+							classnum=classnum.sort(function(a,b){return b-a})
+						}
+						for(var i=0;i<classnum.length;i++){
+							element.push(vthis.dom.get(classnum[i]));
+						}
+						
+					/*	console.log(classnum,"class suzi")
+						console.log(element,"element jiedian")	 */
+						for(var i=0;i<len;i++){
+							var x=Number(element[i].className.match(/\d+/));
+							
+							if(x==obj1.a || x==obj1.b || x==obj1.c || x==obj1.d){
+								if(classnum.includes(x-(obj2.a-obj1.a)*ov)){
+									if(vthis.dom.get(x).innerHTML==vthis.dom.get(x-(obj2.a-obj1.a)*ov).innerHTML){
+										console.log(1,x)
+										vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;
+										vthis.dom.get(x).ifdelete=1;
+										vthis.dom.get(x-(obj2.a-obj1.a)*ov).nvalue=vthis.dom.get(x-(obj2.a-obj1.a)*ov).innerHTML*2;	
+									}
+								}else{
+									console.log(2,x)
+									vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;	
+								} 
+							}
+							if(x==obj2.a || x==obj2.b || x==obj2.c || x==obj2.d){
+								if(classnum.includes(x-(obj2.a-obj1.a)*ov) || classnum.includes(x-(obj2.a-obj1.a)*ov*2)){
+									var a=classnum.filter(function(item){ return (item==x-(obj2.a-obj1.a)*ov || item==x-(obj2.a-obj1.a)*ov*2) });							
+									if(asc){
+										a=a.sort(function(a,b){return a-b})
+									}else{
+										a=a.sort(function(a,b){return b-a})
+									}							
+									if(a.length==1){
+										if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[0])).innerHTML){
+											console.log(3,x)
+											vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;
+											vthis.dom.get(x).ifdelete=1;
+											vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;
+	
+										}
+										else{
+											console.log(4,x)
+											vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;	
+										}	
+									}
+									else if(a.length==2){
+										if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[0])).innerHTML){
+											if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[1])).innerHTML){
+												console.log(5,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;	
+											}
+											else{
+												console.log(6,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;
+												vthis.dom.get(x).ifdelete=1;
+												vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;
+											}	
+										}
+										else{
+											if(vthis.dom.get(Number(a[0])).innerHTML==vthis.dom.get(Number(a[1])).innerHTML){
+												console.log(7,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;	
+											}
+										}
+									}
+								}else{
+									console.log(8,x)
+									vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;	
+								} 
+							}
+							if(x==obj3.a || x==obj3.b || x==obj3.c || x==obj3.d){
+								
+								if(classnum.includes(x-(obj2.a-obj1.a)*ov) || classnum.includes(x-(obj2.a-obj1.a)*ov*2) || classnum.includes(x-(obj2.a-obj1.a)*ov*3)){
+									var a=classnum.filter(function(item){ return (item==x-(obj2.a-obj1.a)*ov || item==x-(obj2.a-obj1.a)*ov*2 || item==x-(obj2.a-obj1.a)*ov*3) });
+								
+									if(asc){
+										a=a.sort(function(a,b){return a-b})
+									}else{
+										a=a.sort(function(a,b){return b-a})
+									}
+									if(a.length==1){ 
+										if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[0])).innerHTML){
+											console.log(9,x)
+											vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*3} item`;
+											vthis.dom.get(x).ifdelete=1;
+											vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;		
+										}
+										else{
+											console.log(10,x)
+											vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;
+											
+										}	
+									}
+									else if(a.length==2){
+										if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[0])).innerHTML){
+											if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[1])).innerHTML){
+												console.log(11,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;		
+											}
+											else{
+												console.log(12,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;
+												vthis.dom.get(x).ifdelete=1;
+												vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;		
+											}
+										}
+										else{
+											if(vthis.dom.get(Number(a[0])).innerHTML==vthis.dom.get(Number(a[1])).innerHTML){
+												console.log(13,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;
+											}
+											else{
+												console.log(14,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;	
+											}
+										}
+									}
+									else if(a.length==3){
+										if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[0])).innerHTML){
+											if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[1])).innerHTML){
+												if(vthis.dom.get(x).innerHTML==vthis.dom.get(Number(a[2])).innerHTML){
+													console.log(15,x)
+													vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;
+													vthis.dom.get(x).ifdelete=1;
+													vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;	
+												}
+												else{
+													console.log(16,x)
+													vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;		
+												}
+											}
+											else{
+												if(vthis.dom.get(Number(a[1])).innerHTML==vthis.dom.get(Number(a[2])).innerHTML){
+													console.log(17,x)
+													vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*2} item`;
+													vthis.dom.get(x).ifdelete=1;
+													vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;				
+												}
+												else{
+													console.log(18,x)
+													vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;
+													vthis.dom.get(x).ifdelete=1;
+													vthis.dom.get(Number(a[0])).nvalue=vthis.dom.get(Number(a[0])).innerHTML*2;	
+												}
+											}
+										}
+										else{
+											if(vthis.dom.get(Number(a[0])).innerHTML==vthis.dom.get(Number(a[1])).innerHTML || vthis.dom.get(Number(a[1])).innerHTML==vthis.dom.get(Number(a[2])).innerHTML){
+												console.log(19,x)
+												vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)} item`;	
+											}
+										}
+									}
+								}else{
+									console.log(20,x)
+									vthis.dom.get(x).nclass=`place${x-(obj2.a-obj1.a)*3} item`;	
+								} 
+							}
+						}
+				/*	console.log(this.obj[0].className,this.obj[0].nclass,this.obj[0].ifdelete,this.obj[0].nvalue);
+					console.log(this.obj[1].className,this.obj[1].nclass,this.obj[1].ifdelete,this.obj[1].nvalue);
+					console.log(this.obj[2].className,this.obj[2].nclass,this.obj[2].ifdelete,this.obj[2].nvalue);
+					console.log(this.obj[3].className,this.obj[3].nclass,this.obj[3].ifdelete,this.obj[3].nvalue); 		*/
+					this.move()
+					this.run=0;
+					ev.preventDefault();
+					console.timeEnd(1);	
+					}
+				}
+			},
+			move:function(){
+				var vthis=this;
+				var fag=0;
+				var len=this.obj.length;
+				vthis.use=[];
+				var temp=[];
+				this.obj.forEach(function(item,index){
+					if(item.ifdelete){
+						setTimeout(()=>{
+						   	item.parentNode.removeChild(item);
+						},300)	
+					}
+					if(item.nclass){
+					   	item.className=item.nclass;
+					   	item.nclass=null;
+					}
+					else{
+						fag+=1;
+					}
+					if(item.nvalue){
+						setTimeout(()=>{
+						   	item.innerHTML=item.nvalue;
+							vthis.color(item);
+					   		item.nvalue=null;
+						},300)	
+					}
+				})	 
+				setTimeout(function(){
+					vthis.obj.forEach(function(item){
+						if(!item.ifdelete){
+							vthis.use.push(item.className.split(" ")[0]);
+							temp.push(item);
+						}					
+					})
+					vthis.obj=temp;
+					if(fag!=len){
+						vthis.create();
+					}else{
+					/*	if(vthis.use.length==16){
+							alert("game over");
+							return false;
+						}	*/
+					}
+					vthis.run=1;
+				},300)
+			},
+			color:function(obj){
+				console.log(obj.innerHTML)
+				switch(Number(obj.innerHTML)){
+					case 2 : obj.style.backgroundColor="#bbffff";break;
+					case 4 : obj.style.backgroundColor="#88ffff";break;
+					case 8 : obj.style.backgroundColor="#44ffff";break;
+					case 16 : obj.style.backgroundColor="#00eeff";break;
+					case 32 : obj.style.backgroundColor="#00ccff";break;
+					case 64 : obj.style.backgroundColor="#00aaff";break;
+					case 128 : obj.style.backgroundColor="#0088ff";break;
+					case 256 : obj.style.backgroundColor="#cc55ff";break;
+					case 512 : obj.style.backgroundColor="#cc00ff";break;
+					case 1024 : obj.style.backgroundColor="#0000cc";break;
+					case 2048 : obj.style.backgroundColor="#pink";break;
+					case 4096 : obj.style.backgroundColor="#purple";break;
+					case 8192 : obj.style.backgroundColor="#gold";break;
+				}
+			}			
+		}
+		game.init();
+			
+	</script>
+</body>
+</html>
